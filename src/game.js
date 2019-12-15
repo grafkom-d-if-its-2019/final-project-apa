@@ -13,7 +13,6 @@ window.onload=function(){
     var ground;
     //var orbitControl;
     var rollingGroundSphere;
-    var heroSphere;
     var rollingSpeed=0.008;
     var heroRollingSpeed;
     var worldRadius=26;
@@ -21,15 +20,11 @@ window.onload=function(){
     var sphericalHelper;
     var pathAngleValues;
     var heroBaseY=2.3;
-    var bounceValue=0.1;
     var gravity=0.005;
     var leftLane=-1;
     var rightLane=1;
     var middleLane=0;
-    var currentLane;
     var clock;
-    var jumping;
-    var sliding;
     var treeReleaseInterval=0.5;
     var lastTreeReleaseTime=0;
     var treesInPath;
@@ -42,8 +37,21 @@ window.onload=function(){
     var scoreText;
     var score;
     var hasCollided;
+    var hasCollided2;
+    var heroSphere;
+    var heroSphere2;
+    var currentLane;
+    var currentLane2;
+    var bounceValue=0.1;
+    var bounceValue2=0.1;
+    var jumping;
+    var sliding;
+    var jumping2;
+    var sliding2;
     var mixer;
+    var mixer2;
     var speed = 0.03;
+    var speed2 = 0.03;
     
     init();
     
@@ -57,6 +65,7 @@ window.onload=function(){
     
     function createScene(){
         hasCollided=false;
+        hasCollided2=false;
         score=0;
         treesInPath=[];
         treesPool=[];
@@ -141,46 +150,92 @@ window.onload=function(){
     function handleKeyDown(keyEvent){
         if (keyEvent.keyCode === 82){
             hasCollided = false;
-            validMove=false;
+            hasCollided2 = false;
             score = -1;
             currentLane=middleLane;
             jumping = true
+            return;
         }
-        if(jumping)return;
-        var validMove=true;
-        if ( keyEvent.keyCode === 37) {//left
-            if(currentLane==middleLane){
-                currentLane=leftLane;
-            }else if(currentLane==rightLane){
-                currentLane=middleLane;
+        if(keyEvent.keyCode === 65 ||  keyEvent.keyCode === 68 ||  keyEvent.keyCode === 87){
+            if(jumping2)return;
+            var validMove2=true;
+            if ( keyEvent.keyCode === 65) {//left
+                if(currentLane2==middleLane){
+                    currentLane2=leftLane;
+                }else if(currentLane2==rightLane){
+                    currentLane2=middleLane;
+                }else{
+                    validMove2=false;	
+                }
+            } else if ( keyEvent.keyCode === 68) {//right
+                if(currentLane2==middleLane){
+                    currentLane2=rightLane;
+                }else if(currentLane2==leftLane){
+                    currentLane2=middleLane;
+                }else{
+                    validMove2=false;	
+                }
             }else{
-                validMove=false;	
+                if ( keyEvent.keyCode === 87){//up, jump
+                    bounceValue2=0.1;
+                    jumping2=true;
+                    speed2=0.01;
+                }
+                validMove2=false;
             }
-        } else if ( keyEvent.keyCode === 39) {//right
-            if(currentLane==middleLane){
-                currentLane=rightLane;
-            }else if(currentLane==leftLane){
-                currentLane=middleLane;
+            if(validMove2){
+                jumping2=true;
+                bounceValue2=0.06;
+            }
+        }
+        if(keyEvent.keyCode === 37 ||  keyEvent.keyCode === 39 ||  keyEvent.keyCode === 38){
+            if(jumping)return;
+            var validMove=true;
+            if ( keyEvent.keyCode === 37) {//left
+                if(currentLane==middleLane){
+                    currentLane=leftLane;
+                }else if(currentLane==rightLane){
+                    currentLane=middleLane;
+                }else{
+                    validMove=false;	
+                }
+            } else if ( keyEvent.keyCode === 39) {//right
+                if(currentLane==middleLane){
+                    currentLane=rightLane;
+                }else if(currentLane==leftLane){
+                    currentLane=middleLane;
+                }else{
+                    validMove=false;	
+                }
             }else{
-                validMove=false;	
+                if ( keyEvent.keyCode === 38){//up, jump
+                    bounceValue=0.1;
+                    jumping=true;
+                    speed=0.01;
+                }
+                validMove=false;
             }
-        }else{
-            if ( keyEvent.keyCode === 38){//up, jump
-                bounceValue=0.1;
+            if(validMove){
                 jumping=true;
-                speed=0.01;
-                // heroSphere.position.y = 2.0;
+                bounceValue=0.06;
             }
-            validMove=false;
-        }
-        //heroSphere.position.x=currentLane;
-        if(validMove){
-            jumping=true;
-            bounceValue=0.06;
         }
     }
     function addHero(){
         const gltfLoader = new GLTFLoader();
+        gltfLoader.load('./models/StickMan_0.glb', (gltf) => {
+            heroSphere2 = gltf.scene;
+            scene.add(heroSphere2);
+            heroSphere2.position.y=heroBaseY;
+            heroSphere2.position.z=4.8;
+            currentLane2=middleLane;
+            heroSphere2.rotation.y = Math.PI;
+            heroSphere2.position.x=currentLane2;
+            heroSphere2.scale.set(0.25,0.25,0.25);
+            mixer2 = new THREE.AnimationMixer(heroSphere2);
+            mixer2.clipAction(gltf.animations[0]).play();
+            
+        });
         gltfLoader.load('./models/StickMan_0.glb', (gltf) => {
             heroSphere = gltf.scene;
             scene.add(heroSphere);
@@ -197,10 +252,14 @@ window.onload=function(){
         var sphereGeometry = new THREE.DodecahedronGeometry( heroRadius, 1);
         var sphereMaterial = new THREE.MeshStandardMaterial( { color: 0xe5f2f2 ,shading:THREE.FlatShading} )
         heroSphere = new THREE.Mesh( sphereGeometry, sphereMaterial );
+        heroSphere2 = new THREE.Mesh( sphereGeometry, sphereMaterial );
         mixer = new THREE.AnimationMixer(heroSphere);
+        mixer2 = new THREE.AnimationMixer(heroSphere2);
         jumping=false;
         heroSphere.receiveShadow = true;
         heroSphere.castShadow=true;
+        heroSphere2.receiveShadow = true;
+        heroSphere2.castShadow=true;
     }
     function addWorld(){
         var sides=40;
@@ -418,6 +477,7 @@ window.onload=function(){
     function update(){
         
         mixer.update(speed);
+        mixer2.update(speed2);
         //stats.update();
         //animate
         if(heroSphere.position.y<=heroBaseY){
@@ -428,7 +488,7 @@ window.onload=function(){
         if(!hasCollided){
             rollingGroundSphere.rotation.x += rollingSpeed;
             heroSphere.position.y+=bounceValue;
-            heroSphere.position.x=THREE.Math.lerp(heroSphere.position.x,currentLane, 2*clock.getDelta());//clock.getElapsedTime());
+            heroSphere.position.x=THREE.Math.lerp(heroSphere.position.x,currentLane, 0.05);//clock.getElapsedTime());
             bounceValue-=gravity;
             
             if(clock.getElapsedTime()>treeReleaseInterval){
@@ -438,6 +498,25 @@ window.onload=function(){
                 score+=2*treeReleaseInterval;
                 scoreText.innerHTML=score.toString();
             }
+        }
+        if(heroSphere2.position.y<=heroBaseY){
+            jumping2=false;
+            speed2 = 0.03;
+            bounceValue2=+0.005;
+        }
+        if(!hasCollided2){
+            // rollingGroundSphere.rotation.x += rollingSpeed;
+            heroSphere2.position.y+=bounceValue2;
+            heroSphere2.position.x=THREE.Math.lerp(heroSphere2.position.x,currentLane2, 0.05);//clock.getElapsedTime());
+            bounceValue2-=gravity;
+            
+            // if(clock.getElapsedTime()>treeReleaseInterval){
+            //     clock.start();
+            //     addPathTree();
+                
+            //     score+=2*treeReleaseInterval;
+            //     scoreText.innerHTML=score.toString();
+            // }
         }
         doTreeLogic();
         doExplosionLogic();
@@ -453,14 +532,22 @@ window.onload=function(){
             treePos.setFromMatrixPosition( oneTree.matrixWorld );
             if(treePos.z>6 &&oneTree.visible){//gone out of our view zone
                 treesToRemove.push(oneTree);
-            }else if(hasCollided){
+            }else if(hasCollided || hasCollided2){
                 treesToRemove.push(oneTree);
             }else{//check collision
                 if(treePos.distanceTo(heroSphere.position)<=0.6){
-                    console.log("hit");
                     hasCollided=true;
                     //currentLane = leftLane;
                     heroSphere.position.y =7;
+                    heroSphere2.position.y =7;
+                    
+                    explode();
+                }
+                if(treePos.distanceTo(heroSphere2.position)<=0.6){
+                    hasCollided2=true;
+                    //currentLane = leftLane;
+                    heroSphere.position.y =7;
+                    heroSphere2.position.y =7;
                     
                     explode();
                 }
@@ -473,7 +560,6 @@ window.onload=function(){
             treesInPath.splice(fromWhere,1);
             treesPool.push(oneTree);
             oneTree.visible=false;
-            console.log("remove tree");
         });
     }
     function doExplosionLogic(){
