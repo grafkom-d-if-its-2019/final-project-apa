@@ -2,11 +2,9 @@ doctype html
 html
   head
     title= title
+    script(src='/socket.io/socket.io.js')
     script(type='module', src='/javascripts/game.js')
     script(type='text/javascript', src='/javascripts/three.min.js')
     //- link(rel='stylesheet', href='/stylesheets/style.css')
   body
     #TutContainer
-    script(src='/socket.io/socket.io.js')
-    script.
-      var socket = io();

@@ -1,0 +1,13 @@
+doctype html
+html
+  head
+    title= title
+    script(src='/socket.io/socket.io.js')
+    script(src='/javascripts/controller.js')
+  body
+    #TutContainer
+    #player(value=id)
+    button(id='lompat') atas
+    button(id='kanan') kanan
+    button(id='kiri') kiri
+    button(id='restart') restart
