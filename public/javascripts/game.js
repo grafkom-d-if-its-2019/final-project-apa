@@ -1,6 +1,6 @@
-import * as THREE from '../lib/three.module.js';
-import {GLTFLoader} from '../lib/GLTFLoader.js';
-import {OrbitControls} from 'https://threejsfundamentals.org/threejs/resources/threejs/r110/examples/jsm/controls/OrbitControls.js';
+import * as THREE from '/javascripts/three.module.js';
+import {GLTFLoader} from '/javascripts/GLTFLoader.js';
+// import {OrbitControls} from 'https://threejsfundamentals.org/threejs/resources/threejs/r110/examples/jsm/controls/OrbitControls.js';
 window.onload=function(){
     
     var sceneWidth;
@@ -74,8 +74,8 @@ window.onload=function(){
         heroRollingSpeed=(rollingSpeed*worldRadius/heroRadius)/5;
         sphericalHelper = new THREE.Spherical();
         pathAngleValues=[1.52,1.57,1.62];
-        sceneWidth=window.innerWidth;
-        sceneHeight=window.innerHeight;
+        sceneWidth=window.innerWidth-(window.innerWidth*1.5/100);
+        sceneHeight=window.innerHeight-(window.innerHeight*3/100);
         scene = new THREE.Scene();//the 3d scene
         camera = new THREE.PerspectiveCamera( 60, sceneWidth / sceneHeight, 0.1, 1000 );//perspective camera
         renderer = new THREE.WebGLRenderer({alpha:true}); //renderer with transparent backdrop
@@ -87,7 +87,7 @@ window.onload=function(){
         dom.appendChild(renderer.domElement);
         
         const loader = new THREE.TextureLoader();
-        const bgTexture = loader.load('assets/forest.jpg');
+        const bgTexture = loader.load('/images/forest.jpg');
         scene.background = bgTexture;
         //stats = new Stats();
         //dom.appendChild(stats.dom);
@@ -223,7 +223,7 @@ window.onload=function(){
     }
     function addHero(){
         const gltfLoader = new GLTFLoader();
-        gltfLoader.load('./models/StickMan_0.glb', (gltf) => {
+        gltfLoader.load('/models/StickMan_0.glb', (gltf) => {
             heroSphere2 = gltf.scene;
             scene.add(heroSphere2);
             heroSphere2.position.y=heroBaseY;
@@ -266,7 +266,7 @@ window.onload=function(){
         var tiers=40;
         const loader = new THREE.TextureLoader();
         var sphereGeometry = new THREE.SphereGeometry( worldRadius, sides,tiers);
-        var sphereMaterial = new THREE.MeshStandardMaterial( { map: loader.load('assets/GroundGrass.jpg'), shading:THREE.FlatShading} )
+        var sphereMaterial = new THREE.MeshStandardMaterial( { map: loader.load('/images/GroundGrass.jpg'), shading:THREE.FlatShading} )
         
         rollingGroundSphere = new THREE.Mesh( sphereGeometry, sphereMaterial );
         rollingGroundSphere.receiveShadow = true;
@@ -347,7 +347,7 @@ window.onload=function(){
         const loader = new THREE.TextureLoader();
         
         const material = new THREE.MeshBasicMaterial({
-            map: loader.load('assets/crate_1.jpg'),
+            map: loader.load('/images/crate_1.jpg'),
         });
         const cube = new THREE.Mesh(geometry, material);
         var boxObstacle = new THREE.Object3D();
@@ -364,7 +364,7 @@ window.onload=function(){
         const loader = new THREE.TextureLoader();
         
         const material = new THREE.MeshBasicMaterial({
-            map: loader.load('assets/DuckObstacle.png'),
+            map: loader.load('/images/DuckObstacle.png'),
         });
         const cube = new THREE.Mesh(geometry, material);
         cube.position.y = 1;
@@ -376,7 +376,7 @@ window.onload=function(){
         const pillarloader = new THREE.TextureLoader();
         
         const pillarmaterial = new THREE.MeshBasicMaterial({
-            map: loader.load('assets/woodStick.jpg'),
+            map: loader.load('/images/woodStick.jpg'),
         });
         const leftpillar = new THREE.Mesh(pillargeometry, pillarmaterial);
         leftpillar.position.x = -0.27;
