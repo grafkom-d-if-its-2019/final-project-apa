@@ -480,6 +480,9 @@ window.onload=function(){
         mixer2.update(speed2);
         //stats.update();
         //animate
+
+        var delta = 2*clock.getDelta();
+
         if(heroSphere.position.y<=heroBaseY){
             jumping=false;
             speed = 0.03;
@@ -488,7 +491,7 @@ window.onload=function(){
         if(!hasCollided){
             rollingGroundSphere.rotation.x += rollingSpeed;
             heroSphere.position.y+=bounceValue;
-            heroSphere.position.x=THREE.Math.lerp(heroSphere.position.x,currentLane, 0.05);//clock.getElapsedTime());
+            heroSphere.position.x=THREE.Math.lerp(heroSphere.position.x,currentLane, delta);//clock.getElapsedTime());
             bounceValue-=gravity;
             
             if(clock.getElapsedTime()>treeReleaseInterval){
@@ -507,7 +510,7 @@ window.onload=function(){
         if(!hasCollided2){
             // rollingGroundSphere.rotation.x += rollingSpeed;
             heroSphere2.position.y+=bounceValue2;
-            heroSphere2.position.x=THREE.Math.lerp(heroSphere2.position.x,currentLane2, 0.05);//clock.getElapsedTime());
+            heroSphere2.position.x=THREE.Math.lerp(heroSphere2.position.x,currentLane2, delta);//clock.getElapsedTime());
             bounceValue2-=gravity;
             
             // if(clock.getElapsedTime()>treeReleaseInterval){
