@@ -102,8 +102,6 @@ window.onload=function(){
         
         window.addEventListener('resize', onWindowResize, false); //resize callback
         
-        document.onkeydown = handleKeyDown;
-        
         scoreText = document.createElement('div');
         scoreText.style.position = 'absolute';
         //text2.style.zIndex = 1;    // if you still don't see the label, try uncommenting this
@@ -147,19 +145,50 @@ window.onload=function(){
             treesPool.push(newTree);
         }
     }
-    function handleKeyDown(keyEvent){
-        if (keyEvent.keyCode === 82){
-            hasCollided = false;
-            hasCollided2 = false;
-            score = -1;
-            currentLane=middleLane;
-            jumping = true
-            return;
-        }
-        if(keyEvent.keyCode === 65 ||  keyEvent.keyCode === 68 ||  keyEvent.keyCode === 87){
+    var socket = io();
+    socket.on('action', function(data){
+        hasCollided = false;
+        hasCollided2 = false;
+        score = -1;
+        currentLane=middleLane;
+        jumping = true
+    });
+    socket.on('gamemovement', function(data){
+        if(data.player == 1){
+            if(jumping)return;
+            var validMove=true;
+            if ( data.movement === 37) {//left
+                if(currentLane==middleLane){
+                    currentLane=leftLane;
+                }else if(currentLane==rightLane){
+                    currentLane=middleLane;
+                }else{
+                    validMove=false;	
+                }
+            } else if ( data.movement === 39) {//right
+                if(currentLane==middleLane){
+                    currentLane=rightLane;
+                }else if(currentLane==leftLane){
+                    currentLane=middleLane;
+                }else{
+                    validMove=false;	
+                }
+            }else{
+                if ( data.movement === 38){//up, jump
+                    bounceValue=0.1;
+                    jumping=true;
+                    speed=0.01;
+                }
+                validMove=false;
+            }
+            if(validMove){
+                jumping=true;
+                bounceValue=0.06;
+            }
+        }else if(data.player == 2){
             if(jumping2)return;
             var validMove2=true;
-            if ( keyEvent.keyCode === 65) {//left
+            if ( data.movement === 37) {//left
                 if(currentLane2==middleLane){
                     currentLane2=leftLane;
                 }else if(currentLane2==rightLane){
@@ -167,7 +196,7 @@ window.onload=function(){
                 }else{
                     validMove2=false;	
                 }
-            } else if ( keyEvent.keyCode === 68) {//right
+            } else if ( data.movement === 39) {//right
                 if(currentLane2==middleLane){
                     currentLane2=rightLane;
                 }else if(currentLane2==leftLane){
@@ -176,7 +205,7 @@ window.onload=function(){
                     validMove2=false;	
                 }
             }else{
-                if ( keyEvent.keyCode === 87){//up, jump
+                if ( data.movement === 38){//up, jump
                     bounceValue2=0.1;
                     jumping2=true;
                     speed2=0.01;
@@ -188,39 +217,7 @@ window.onload=function(){
                 bounceValue2=0.06;
             }
         }
-        if(keyEvent.keyCode === 37 ||  keyEvent.keyCode === 39 ||  keyEvent.keyCode === 38){
-            if(jumping)return;
-            var validMove=true;
-            if ( keyEvent.keyCode === 37) {//left
-                if(currentLane==middleLane){
-                    currentLane=leftLane;
-                }else if(currentLane==rightLane){
-                    currentLane=middleLane;
-                }else{
-                    validMove=false;	
-                }
-            } else if ( keyEvent.keyCode === 39) {//right
-                if(currentLane==middleLane){
-                    currentLane=rightLane;
-                }else if(currentLane==leftLane){
-                    currentLane=middleLane;
-                }else{
-                    validMove=false;	
-                }
-            }else{
-                if ( keyEvent.keyCode === 38){//up, jump
-                    bounceValue=0.1;
-                    jumping=true;
-                    speed=0.01;
-                }
-                validMove=false;
-            }
-            if(validMove){
-                jumping=true;
-                bounceValue=0.06;
-            }
-        }
-    }
+    });
     function addHero(){
         const gltfLoader = new GLTFLoader();
         gltfLoader.load('/models/StickMan_0.glb', (gltf) => {
@@ -314,7 +311,6 @@ window.onload=function(){
             if(treesPool.length==0)return;
             newTree=treesPool.pop();
             newTree.visible=true;
-            //console.log("add tree");
             treesInPath.push(newTree);
             sphericalHelper.set( worldRadius+0.15, pathAngleValues[row], -rollingGroundSphere.rotation.x+4 );
             
@@ -480,9 +476,9 @@ window.onload=function(){
         mixer2.update(speed2);
         //stats.update();
         //animate
-
+        
         var delta = 2*clock.getDelta();
-
+        
         if(heroSphere.position.y<=heroBaseY){
             jumping=false;
             speed = 0.03;
@@ -512,14 +508,6 @@ window.onload=function(){
             heroSphere2.position.y+=bounceValue2;
             heroSphere2.position.x=THREE.Math.lerp(heroSphere2.position.x,currentLane2, delta);//clock.getElapsedTime());
             bounceValue2-=gravity;
-            
-            // if(clock.getElapsedTime()>treeReleaseInterval){
-            //     clock.start();
-            //     addPathTree();
-                
-            //     score+=2*treeReleaseInterval;
-            //     scoreText.innerHTML=score.toString();
-            // }
         }
         doTreeLogic();
         doExplosionLogic();
@@ -543,14 +531,17 @@ window.onload=function(){
                     //currentLane = leftLane;
                     heroSphere.position.y =7;
                     heroSphere2.position.y =7;
+                    scoreText.innerHTML = "player 2 win";
                     
                     explode();
                 }
                 if(treePos.distanceTo(heroSphere2.position)<=0.6){
                     hasCollided2=true;
+                    hasCollided=true;
                     //currentLane = leftLane;
                     heroSphere.position.y =7;
                     heroSphere2.position.y =7;
+                    scoreText.innerHTML = "player 1 win";
                     
                     explode();
                 }

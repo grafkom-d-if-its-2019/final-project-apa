@@ -22,7 +22,17 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use(function(req, res, next){
-  res.io = io;
+  io.on('connection', function (socket) {
+    console.log('user connected');
+    socket.on('action', function (data) {
+      socket.broadcast.emit('action', data);
+      console.log(data);
+    });
+    socket.on('movement', function (data) {
+      socket.broadcast.emit('gamemovement', data);
+      console.log(data);
+    });
+  });
   next();
 });
 
