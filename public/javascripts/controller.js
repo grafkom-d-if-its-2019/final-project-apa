@@ -31,7 +31,6 @@ window.onload = function(){
         socket.emit('movement', {player:playerid, movement:37});
     }
     function restart(){
-        console.log('restart');
         socket.emit('action', {player:playerid, action:82});
     }
     socket.on('disconnect', function () { console.log('disconnected')});
