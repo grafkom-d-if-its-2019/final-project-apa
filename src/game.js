@@ -1,3 +1,6 @@
+import * as THREE from '../lib/three.module.js';
+import {GLTFLoader} from '../lib/GLTFLoader.js';
+import {OrbitControls} from 'https://threejsfundamentals.org/threejs/resources/threejs/r110/examples/jsm/controls/OrbitControls.js';
 window.onload=function(){
     
     var sceneWidth;
@@ -17,7 +20,7 @@ window.onload=function(){
     var heroRadius=0.2;
     var sphericalHelper;
     var pathAngleValues;
-    var heroBaseY=1.8;
+    var heroBaseY=2.3;
     var bounceValue=0.1;
     var gravity=0.005;
     var leftLane=-1;
@@ -26,6 +29,7 @@ window.onload=function(){
     var currentLane;
     var clock;
     var jumping;
+    var sliding;
     var treeReleaseInterval=0.5;
     var lastTreeReleaseTime=0;
     var treesInPath;
@@ -38,6 +42,8 @@ window.onload=function(){
     var scoreText;
     var score;
     var hasCollided;
+    var mixer;
+    var speed = 0.03;
     
     init();
     
@@ -162,6 +168,8 @@ window.onload=function(){
             if ( keyEvent.keyCode === 38){//up, jump
                 bounceValue=0.1;
                 jumping=true;
+                speed=0.01;
+                // heroSphere.position.y = 2.0;
             }
             validMove=false;
         }
@@ -172,17 +180,27 @@ window.onload=function(){
         }
     }
     function addHero(){
+        const gltfLoader = new GLTFLoader();
+        gltfLoader.load('./models/StickMan_0.glb', (gltf) => {
+            heroSphere = gltf.scene;
+            scene.add(heroSphere);
+            heroSphere.position.y=heroBaseY;
+            heroSphere.position.z=4.8;
+            currentLane=middleLane;
+            heroSphere.rotation.y = Math.PI;
+            heroSphere.position.x=currentLane;
+            heroSphere.scale.set(0.25,0.25,0.25);
+            mixer = new THREE.AnimationMixer(heroSphere);
+            mixer.clipAction(gltf.animations[0]).play();
+            
+        });
         var sphereGeometry = new THREE.DodecahedronGeometry( heroRadius, 1);
         var sphereMaterial = new THREE.MeshStandardMaterial( { color: 0xe5f2f2 ,shading:THREE.FlatShading} )
-        jumping=false;
         heroSphere = new THREE.Mesh( sphereGeometry, sphereMaterial );
+        mixer = new THREE.AnimationMixer(heroSphere);
+        jumping=false;
         heroSphere.receiveShadow = true;
         heroSphere.castShadow=true;
-        scene.add( heroSphere );
-        heroSphere.position.y=heroBaseY;
-        heroSphere.position.z=4.8;
-        currentLane=middleLane;
-        heroSphere.position.x=currentLane;
     }
     function addWorld(){
         var sides=40;
@@ -239,7 +257,7 @@ window.onload=function(){
             newTree.visible=true;
             //console.log("add tree");
             treesInPath.push(newTree);
-            sphericalHelper.set( worldRadius+0.85, pathAngleValues[row], -rollingGroundSphere.rotation.x+4 );
+            sphericalHelper.set( worldRadius+0.15, pathAngleValues[row], -rollingGroundSphere.rotation.x+4 );
             
         }else{
             newTree=createTree();
@@ -398,15 +416,17 @@ window.onload=function(){
     }
     
     function update(){
+        
+        mixer.update(speed);
         //stats.update();
         //animate
         if(heroSphere.position.y<=heroBaseY){
             jumping=false;
-            bounceValue=(Math.random()*0.04)+0.005;
+            speed = 0.03;
+            bounceValue=+0.005;
         }
         if(!hasCollided){
             rollingGroundSphere.rotation.x += rollingSpeed;
-            heroSphere.rotation.x -= heroRollingSpeed;
             heroSphere.position.y+=bounceValue;
             heroSphere.position.x=THREE.Math.lerp(heroSphere.position.x,currentLane, 2*clock.getDelta());//clock.getElapsedTime());
             bounceValue-=gravity;
