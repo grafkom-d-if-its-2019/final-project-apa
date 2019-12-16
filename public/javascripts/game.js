@@ -220,7 +220,7 @@ window.onload=function(){
     });
     function addHero(){
         const gltfLoader = new GLTFLoader();
-        gltfLoader.load('/models/StickMan_0.glb', (gltf) => {
+        gltfLoader.load('/models/StickMan_rED.glb', (gltf) => {
             heroSphere2 = gltf.scene;
             scene.add(heroSphere2);
             heroSphere2.position.y=heroBaseY;
@@ -233,7 +233,7 @@ window.onload=function(){
             mixer2.clipAction(gltf.animations[0]).play();
             
         });
-        gltfLoader.load('./models/StickMan_0.glb', (gltf) => {
+        gltfLoader.load('./models/StickMan_bLU.glb', (gltf) => {
             heroSphere = gltf.scene;
             scene.add(heroSphere);
             heroSphere.position.y=heroBaseY;
